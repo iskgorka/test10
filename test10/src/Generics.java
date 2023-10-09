@@ -2,6 +2,81 @@ import java.util.SplittableRandom;
 
 public class Generics {
 }
+// Ограниченные метасимвольные аргументы
+// Двумерные координаты
+class TwoD {
+    int x, y;
+    TwoD(int a, int b) {
+        x = a;
+        y = b;
+    }
+}
+// Трехмерные координаты
+class ThreeD extends TwoD {
+    int z;
+    ThreeD(int a, int b, int c) {
+        super(a, b);
+        z = c;
+    }
+}
+// Четырехмерные координаты
+class FourD extends ThreeD {
+    int t;
+    FourD(int a, int b, int c, int d) {
+        super(a, b, c);
+        t = d;
+    }
+}
+class FiveD extends FourD {
+    int g;
+    FiveD(int a, int b, int c, int d, int g) {
+        super(a, b, c, d);
+        this.g = g;
+    }
+}
+//Этот класс хранит массив координатных объектов
+class Coords<T extends TwoD> {
+    T[] coords;
+    Coords(T[] o) {
+        coords = o;
+    }
+}
+//Продемонстрировать применение ограниченных метасимволов
+class BoundedWildcard {
+    static void showXY(Coords<?> c) {
+        System.out.println("Координаты X Y:");
+        for (int i = 0; i < c.coords.length; i++)
+            System.out.println(c.coords[i].x + " " + c.coords[i].y);
+        System.out.println();
+    }
+    static void showXYZ(Coords<? extends ThreeD> c) {
+        System.out.println("Координаты X Y Z:");
+        for (int i = 0; i < c.coords.length; i++)
+            System.out.println(c.coords[i].x + " " + c.coords[i].y + " " + c.coords[i].z);
+        System.out.println();
+    }
+    static void showAll(Coords<? super FourD> c) {
+        System.out.println("Координаты X Y:");
+        for (int i = 0; i < c.coords.length; i++)
+            System.out.println(c.coords[i].x + " " + c.coords[i].y);
+        System.out.println();
+    }
+    public static void main(String[] args) {
+        TwoD[] td = {
+                new TwoD(0,0),
+                new TwoD(7,9),
+                new TwoD(18,4),
+                new TwoD(-1,-23),
+        };
+        Coords<TwoD> tdlocs = new Coords<TwoD>(td);
+        System.out.println("Содержимое объекта tdlocs.");
+        showXY(tdlocs); // Верно, это тип TwoD
+        ///showXYZ(tdlocs); // ОШИБКА!!! Это не тип ThreeD
+        showAll(tdlocs);
+//а теперь создать несколько объектов типа FourD
+
+    }
+}
 /*
 Lec10 example 1
         //продемонстрировать автоупаковку/автораспаковку
@@ -256,15 +331,15 @@ Generic example 6
                 Stats<Float> fOb = new Stats<Float>(fnums);
                 double x = fOb.average();
                 System.out.println("Среднее значение fOb равно " + x);
-                //выяснить какие массивы имеют одинаковые средние значения
+        //выяснить какие массивы имеют одинаковые средние значения
                 System.out.print("Средние значения iOb и dOb");
                 if(iOb.sameAvg(dOb))
                     System.out.println(" равны.");
                 else
                     System.out.println(" отличаются");
-                System.out.print("Средние значения iOb и fOb");
+                System.out.print("Средние iOb и fOb");
                 if(iOb.sameAvg(fOb))
-                    System.out.println(" равны.");
+                    System.out.println(" одинаковы.");
                 else
                     System.out.println(" отличаются");
             }
