@@ -1,83 +1,95 @@
-import java.util.SplittableRandom;
-
 public class Generics {
 }
-// Ограниченные метасимвольные аргументы
-// Двумерные координаты
-class TwoD {
-    int x, y;
-    TwoD(int a, int b) {
-        x = a;
-        y = b;
-    }
-}
-// Трехмерные координаты
-class ThreeD extends TwoD {
-    int z;
-    ThreeD(int a, int b, int c) {
-        super(a, b);
-        z = c;
-    }
-}
-// Четырехмерные координаты
-class FourD extends ThreeD {
-    int t;
-    FourD(int a, int b, int c, int d) {
-        super(a, b, c);
-        t = d;
-    }
-}
-class FiveD extends FourD {
-    int g;
-    FiveD(int a, int b, int c, int d, int g) {
-        super(a, b, c, d);
-        this.g = g;
-    }
-}
-//Этот класс хранит массив координатных объектов
-class Coords<T extends TwoD> {
-    T[] coords;
-    Coords(T[] o) {
-        coords = o;
-    }
-}
-//Продемонстрировать применение ограниченных метасимволов
-class BoundedWildcard {
-    static void showXY(Coords<?> c) {
-        System.out.println("Координаты X Y:");
-        for (int i = 0; i < c.coords.length; i++)
-            System.out.println(c.coords[i].x + " " + c.coords[i].y);
-        System.out.println();
-    }
-    static void showXYZ(Coords<? extends ThreeD> c) {
-        System.out.println("Координаты X Y Z:");
-        for (int i = 0; i < c.coords.length; i++)
-            System.out.println(c.coords[i].x + " " + c.coords[i].y + " " + c.coords[i].z);
-        System.out.println();
-    }
-    static void showAll(Coords<? super FourD> c) {
-        System.out.println("Координаты X Y:");
-        for (int i = 0; i < c.coords.length; i++)
-            System.out.println(c.coords[i].x + " " + c.coords[i].y);
-        System.out.println();
-    }
-    public static void main(String[] args) {
-        TwoD[] td = {
-                new TwoD(0,0),
-                new TwoD(7,9),
-                new TwoD(18,4),
-                new TwoD(-1,-23),
-        };
-        Coords<TwoD> tdlocs = new Coords<TwoD>(td);
-        System.out.println("Содержимое объекта tdlocs.");
-        showXY(tdlocs); // Верно, это тип TwoD
-        ///showXYZ(tdlocs); // ОШИБКА!!! Это не тип ThreeD
-        showAll(tdlocs);
-//а теперь создать несколько объектов типа FourD
 
-    }
-}
 /*
+Example 1
+//Простое обобщение классов
+        class Point<T, V> {
+            public V id;
+            public T x, y;
+            Point(T x, T y) {
+                this.x = x;
+                this.y = y;
+            }
+            V getId() {return id;}
+            T getCoordX() {return x;}
+            T getCoordY() {return y;}
+            Object[] getCoords() { return new Object[]{x, y};}
+        }
+
+        class Main {
+            public static void main(String[] args) {
+                Point<Float, Integer> pt = new Point<>(1f, 2f);
+                Point<Double, String> ptD = new Point<>(10.5, 22.6);
+                pt.id = 1;
+                ptD.id = "point_1";
+                //pt.x = 10;
+                //pt.y = 20;
+                //ptD.x = 20.5;
+                System.out.println(pt.getCoordX() + " " + pt.getCoordY());
+                for (Object coord : pt.getCoords()) {
+                    System.out.println((Float) coord);
+                }
+            }
+        }
+
+Example 2
+        //Ограничение типов, метасимвольные аргументы, обобщенные методы и конструкторы
+        //class Numbers<T> {}
+        //class Point<T extends Numbers<Integer>> {}
+        //interface I1 (){}
+        //interface I2 (){}
+        //class Point<T extends Number & I1, I2>> {}
+        class Point<T extends Number> {
+            public T x, y;
+            Point(T x, T y) {
+                this.x = x;
+                this.y = y;
+            }
+            double getMax() {
+                double xd = x.doubleValue();
+                double yd = y.doubleValue();
+                return (xd < yd) ? yd : xd;
+            }
+            boolean equalsPoint(Point<? extends Number> pt) {  //метасимвольный аргумент с ограничением
+                return (this.x.doubleValue() == pt.x.doubleValue() &&
+                        this.y.doubleValue() == pt.y.doubleValue());
+            }
+        }
+        class Math {
+            public static <T> boolean isIn(T val, T[] ar) { //обобщенный метод
+                for (T v : ar)
+                    if(v.equals(val)) return true;
+                return false;
+            }
+        }
+        class Digit {
+            public double value;
+            <T extends Number>Digit(T value){ //обобщенный конструктор
+                this.value = value.doubleValue();
+            }
+        }
+        class Main {
+            public static void main(String[] args) {
+                Point<Integer> pt = new Point<>(1,2);
+                Point<Double> pt2 = new Point<>(1.0,2.0);
+                double max = pt.getMax();
+                System.out.println(max);
+                System.out.println(pt.equalsPoint(pt2));
+
+                Short ar[] = {1,2,3,4};
+                Short val = 5;
+                boolean flIn = Math.<Short>isIn(val, ar);
+                System.out.println(flIn);
+
+                Digit d1 = new Digit(10);
+                Digit d2 = new Digit(10.5);
+                Digit d3 = new Digit(10.5f);
+                System.out.println(d1.value + " " + d2.value + " " + d3.value);
+
+            }
+        }
+
 Lec10 example 1
         //продемонстрировать автоупаковку/автораспаковку
         class AutoBox {
@@ -346,4 +358,210 @@ Generic example 6
         }
 
 Generic example 7
+        // Ограниченные метасимвольные аргументы
+        // Двумерные координаты
+        class TwoD {
+            int x, y;
+
+            TwoD(int a, int b) {
+                x = a;
+                y = b;
+            }
+        }
+
+        // Трехмерные координаты
+        class ThreeD extends TwoD {
+            int z;
+
+            ThreeD(int a, int b, int c) {
+                super(a, b);
+                z = c;
+            }
+        }
+
+        // Четырехмерные координаты
+        class FourD extends ThreeD {
+            int t;
+
+            FourD(int a, int b, int c, int d) {
+                super(a, b, c);
+                t = d;
+            }
+        }
+
+        class FiveD extends FourD {
+            int g;
+
+            FiveD(int a, int b, int c, int d, int g) {
+                super(a, b, c, d);
+                this.g = g;
+            }
+        }
+
+        //Этот класс хранит массив координатных объектов
+        class Coords<T extends TwoD> {
+            T[] coords;
+
+            Coords(T[] o) {
+                coords = o;
+            }
+        }
+
+        //Продемонстрировать применение ограниченных метасимволов
+        class BoundedWildcard {
+            static void showXY(Coords<?> c) {
+                System.out.println("Координаты X Y:");
+                for (int i = 0; i < c.coords.length; i++)
+                    System.out.println(c.coords[i].x + " " + c.coords[i].y);
+                System.out.println();
+            }
+
+            static void showXYZ(Coords<? extends ThreeD> c) {
+                System.out.println("Координаты X Y Z:");
+                for (int i = 0; i < c.coords.length; i++)
+                    System.out.println(c.coords[i].x + " " + c.coords[i].y + " " + c.coords[i].z);
+                System.out.println();
+            }
+
+            static void showAll(Coords<? super FourD> c) {
+                System.out.println("Координаты X Y:");
+                for (int i = 0; i < c.coords.length; i++)
+                    System.out.println(c.coords[i].x + " " + c.coords[i].y);
+                System.out.println();
+            }
+
+            public static void main(String[] args) {
+                TwoD[] td = {
+                        new TwoD(0, 0),
+                        new TwoD(7, 9),
+                        new TwoD(18, 4),
+                        new TwoD(-1, -23),
+                };
+                Coords<TwoD> tdlocs = new Coords<TwoD>(td);
+                System.out.println("Содержимое объекта tdlocs.");
+                showXY(tdlocs); // Верно, это тип TwoD
+                ///showXYZ(tdlocs); // ОШИБКА!!! Это не тип ThreeD
+                showAll(tdlocs);
+        //а теперь создать несколько объектов типа FourD
+                FourD[] fd = {
+                        new FourD(1, 2, 3, 4),
+                        new FourD(6, 8, 14, 8),
+                        new FourD(22, 9, 4, 9),
+                        new FourD(3, -2, -23, 17),
+                };
+                Coords<FourD> fdlocs = new Coords<FourD>(fd);
+                System.out.println("Содержимое объекта fdlocs.");
+        //Здесь всё верно
+                showXY(fdlocs);
+                showXYZ(fdlocs);
+                showAll(fdlocs);
+                FiveD[] fd1 = {new FiveD(1, 2, 3, 4, 5)};
+                Coords<FiveD> fd1locs = new Coords<FiveD>(fd1);
+                showXY(fd1locs);
+                showXYZ(fd1locs);
+                //showAll(fd1locs);
+            }
+        }
+
+Generic example 8
+        //Продемонстировать простой обобщенный метод
+        class GenMethDemo {
+            //определить, содержится ли объект в массиве
+            static <T extends Comparable<T>, V extends T> boolean isIn(T x, V[] y) {
+                for (int i = 0; i < y.length; i++)
+                    if (x.equals(y[i])) return true;
+                return false;
+            }
+
+            public static void main(String[] args) {
+                //применить метод isIn() для целых чисел
+                Integer[] nums = {1, 2, 3, 4, 5};
+                if (isIn(2, nums))
+                    System.out.println("Число 2 содержится в массиве nums.");
+                if (!isIn(7, nums))
+                    System.out.println("Число 7 отсутствует в массиве nums.");
+                System.out.println();
+        //применить метод isIn() для символьных строк
+                String[] strs = {"один", "два", "три", "четыре", "пять"};
+                if (isIn("два", strs))
+                    System.out.println("два содержится в массиве strs");
+                if (!isIn("семь", strs))
+                    System.out.println("семь отсутствует в массиве strs");
+        //НЕ СКОМПИЛИРУЕТСЯ! Типы должны быть совместимы
+                //if (isIn("два", nums))
+                //    System.out.println("два содержится в массиве strs");
+            }
+        }
+
+Generic example 9
+        //Использовать обобщенный конструктор
+        class GenCons {
+            private double val;
+
+            <T extends Number> GenCons(T arg) {
+                val = arg.doubleValue();
+            }
+
+            void showAll() {
+                System.out.println("val: " + val);
+            }
+        }
+
+        class GenConsDemo {
+            public static void main(String[] args) {
+                GenCons test = new GenCons(100);
+                GenCons test2 = new GenCons(123.5F);
+                test.showAll();
+                test2.showAll();
+            }
+        }
+
+Generic example 10
+        //Пример применения обобщенного интерфейса
+        //Обобщенный интерфейс MinMax для определения
+        //минимального и максимального значений
+        interface MinMax<T extends Comparable<T>> {
+            T min();
+            T max();
+        }
+
+        //реализовать обобщенный интерфейс MinMax
+        class MyClass<T extends Comparable<T>> implements MinMax<T> {
+            T[] vals;
+
+            MyClass(T[] o) {
+                vals = o;
+            }
+
+            //возвратить минимальное значение из массива vals
+            public T min() {
+                T v = vals[0];
+                for (int i = 1; i < vals.length; i++)
+                    if (vals[i].compareTo(v) < 0) v = vals[i];
+                return v;
+            }
+
+            //возвратить максимальное значение из массива vals
+            public T max() {
+                T v = vals[0];
+                for (int i = 1; i < vals.length; i++)
+                    if (vals[i].compareTo(v) > 0) v = vals[i];
+                return v;
+            }
+        }
+
+        class GenIfDemo {
+            public static void main(String[] args) {
+                Integer[] inums = {3, 6, 2, 8, 6};
+                Character[] chs = {'b', 'r', 'p', 'v'};
+                MyClass<Integer> iob = new MyClass<Integer>(inums);
+                MyClass<Character> cob = new MyClass<Character>(chs);
+                System.out.println("Максимальное значение в массиве inums: " + iob.max());
+                System.out.println("Минимальное значение в массиве inums: " + iob.min());
+                System.out.println("Максимальное значение в массиве chs: " + cob.max());
+                System.out.println("Минимальное значение в массиве chs: " + cob.min());
+            }
+        }
+
+File example 1
 */
