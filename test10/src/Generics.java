@@ -1,9 +1,8 @@
 public class Generics {
 }
-
 /*
 Example 1
-//Простое обобщение классов
+        //Простое обобщение классов
         class Point<T, V> {
             public V id;
             public T x, y;
@@ -11,10 +10,18 @@ Example 1
                 this.x = x;
                 this.y = y;
             }
-            V getId() {return id;}
-            T getCoordX() {return x;}
-            T getCoordY() {return y;}
-            Object[] getCoords() { return new Object[]{x, y};}
+            V getId() {
+                return id;
+            }
+            T getCoordX() {
+                return x;
+            }
+            T getCoordY() {
+                return y;
+            }
+            Object[] getCoords() {
+                return new Object[]{x, y};
+            }
         }
 
         class Main {
@@ -87,6 +94,75 @@ Example 2
                 Digit d3 = new Digit(10.5f);
                 System.out.println(d1.value + " " + d2.value + " " + d3.value);
 
+            }
+        }
+
+Example 3
+        //Обобщенные интерфейсы
+        enum TypeCoord {
+            COORD_X, COORD_Y;
+        }
+        interface GeomInterface<T> { //обобщенный интерфейс
+            void setCoord(T x, T y);
+            T getCoord(TypeCoord type);
+        }
+        //класс, который реализует обобщенный интерфейс
+        class Point <TT> implements GeomInterface<TT> {
+            private TT x, y;
+            public void setCoord(TT x, TT y) {
+                this.x = x;
+                this.y = y;
+            }
+            public TT getCoord(TypeCoord type) {
+                return (type == TypeCoord.COORD_X) ? x : y;
+            }
+        }
+        class Main {
+            public static void main(String[] args) {
+                Point<Float> pt = new Point<>();
+                GeomInterface<Float> pt1 = new Point<>();
+                pt.setCoord(10f,20f);
+                pt1.setCoord(15f,25f);
+                System.out.println(pt.getCoord(TypeCoord.COORD_X));
+                System.out.println(pt.getCoord(TypeCoord.COORD_Y));
+
+                System.out.println(pt1.getCoord(TypeCoord.COORD_X));
+                System.out.println(pt1.getCoord(TypeCoord.COORD_Y));
+            }
+        }
+
+Example 4
+        //обобщение в наследовании
+        class PointProp<T> {
+            T id, color;
+        }
+        class Point2D <T2D> extends PointProp<T2D> {
+            T2D x, y;
+            Point2D(T2D x, T2D y) {
+                this.x = x;
+                this.y = y;
+            }
+        }
+        class Point3D <T3D> extends PointProp<Float> {
+            T3D x, y, z;
+            Point3D(T3D x, T3D y, T3D z) {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+        }
+        class Main {
+            public static void main(String[] args) {
+                Point2D<Integer> p1 = new Point2D<>(1, 2);
+                Point3D<Float> p2 = new Point3D<>(10f, 20f, 30f);
+                PointProp<Float> p3 = new Point3D<>(3,4,5);
+                //instanceof - оператор проверяет является ли ссылка экземпляром указанного класса
+                if (p1 instanceof Point2D<?>)
+                    System.out.println("p1 является объектом класса Point2D");
+                if (p3 instanceof Point2D<?>)
+                    System.out.println("p3 является объектом класса Point2D");
+                //приведение типов
+                ((Point2D<Integer>)p1).x = 5; //ошибки нет, типы данных должны совпадать
             }
         }
 
