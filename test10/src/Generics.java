@@ -638,6 +638,4 @@ Generic example 10
                 System.out.println("Минимальное значение в массиве chs: " + cob.min());
             }
         }
-
-File example 1
 */
